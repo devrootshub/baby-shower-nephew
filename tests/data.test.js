@@ -9,8 +9,8 @@ describe('dados de produção',()=>{
     expect(new Set(guestSeed.map(g=>g.id)).size).toBe(49);
   });
 
-  it('carrega os treze presentes com imagens locais',()=>{
-    expect(gifts).toHaveLength(13);
+  it('carrega os vinte presentes com imagens locais',()=>{
+    expect(gifts).toHaveLength(20);
     expect(gifts.every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
     expect(gifts.every(g=>g.target>=1)).toBe(true);
   });
