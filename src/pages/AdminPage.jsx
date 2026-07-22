@@ -16,7 +16,7 @@ function AdminDashboard({logout}){
   const [tab,setTab]=useState('Resumo');
   const [mobileMenuOpen,setMobileMenuOpen]=useState(false);
   const [data,setData]=useState({rsvps:[],guests:[],gifts:[],reservations:[]});
-  const load=()=>Promise.all([dataService.getRsvps?.()||[],dataService.getGuests?.()||[],dataService.getGifts(),dataService.getReservations?.()||[]]).then(([rsvps,guests,gifts,reservations])=>setData({rsvps,guests,gifts,reservations}));
+  const load=()=>Promise.all([dataService.getRsvps?.()||[],dataService.getGuests?.()||[],dataService.getAdminGifts?.()||dataService.getGifts(),dataService.getReservations?.()||[]]).then(([rsvps,guests,gifts,reservations])=>setData({rsvps,guests,gifts,reservations}));
   useEffect(()=>{load();return dataService.subscribe?.(load)},[]);
   const reservationRows=data.reservations.map(r=>{const gift=data.gifts.find(g=>g.id===r.giftId);return {...r,giftName:gift?.name||'Presente',giftDescription:gift?.description||'—'}});
   const selectTab=nextTab=>{setTab(nextTab);setMobileMenuOpen(false)};
@@ -40,9 +40,11 @@ function AdminSummary({data}){
   const declined=data.rsvps.filter(r=>r.status==='no').length;
   const adults=attending.reduce((sum,r)=>sum+Number(r.adults??r.guests??0),0);
   const children=attending.reduce((sum,r)=>sum+Number(r.children??0),0);
-  const activeReservations=data.reservations.filter(r=>r.status==='active').length;
-  const target=data.gifts.reduce((sum,g)=>sum+Number(g.target||0),0);
-  const reserved=data.gifts.reduce((sum,g)=>sum+Number(g.reserved||0),0);
+  const visibleGifts=data.gifts.filter(g=>g.isVisible);
+  const visibleGiftIds=new Set(visibleGifts.map(g=>g.id));
+  const activeReservations=data.reservations.filter(r=>r.status==='active'&&visibleGiftIds.has(r.giftId)).length;
+  const target=visibleGifts.reduce((sum,g)=>sum+Number(g.target||0),0);
+  const reserved=visibleGifts.reduce((sum,g)=>sum+Number(g.reserved||0),0);
   const percentage=target?Math.round(reserved/target*100):0;
   const byNewest=(a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0);
   const latestRsvps=[...data.rsvps].sort(byNewest).slice(0,3);
@@ -106,11 +108,13 @@ function GiftsAdminPage({gifts,reload}){
   const [editing,setEditing]=useState(null);
   const [target,setTarget]=useState(1);
   const [error,setError]=useState('');
+  const [updatingVisibility,setUpdatingVisibility]=useState(null);
   const openEdit=gift=>{setEditing(gift);setTarget(gift.target);setError('')};
   const save=async e=>{e.preventDefault();if(Number(target)<Number(editing.reserved||0)){setError(`A quantidade não pode ser inferior às ${editing.reserved} unidades já reservadas.`);return}try{await dataService.updateGiftTarget(editing.id,target);setEditing(null);await reload()}catch{setError('Não foi possível atualizar a quantidade.')}};
+  const toggleVisibility=async gift=>{setUpdatingVisibility(gift.id);try{await dataService.setGiftVisibility(gift.id,!gift.isVisible);await reload()}finally{setUpdatingVisibility(null)}};
   return <>
-    <section className="gifts-admin-panel"><div className="gifts-admin-heading"><div><p className="eyebrow">LISTA COLABORATIVA</p><h2>Gerir presentes</h2></div><span>{gifts.filter(g=>Number(g.reserved)>=Number(g.target)).length} de {gifts.length} completos</span></div>
-      <div className="gifts-admin-table"><div className="gifts-admin-head"><span>Presente</span><span>Categoria</span><span>Reservado</span><span>Quantidade pedida</span><span>Estado</span></div>{gifts.map(g=>{const complete=Number(g.reserved)>=Number(g.target);return <article className="gifts-admin-row" key={g.id}><strong>{g.name}</strong><span>{g.category}</span><span>{g.reserved}</span><div className="gift-target-cell"><b>{g.target}</b><button onClick={()=>openEdit(g)} aria-label={`Alterar quantidade de ${g.name}`}>Alterar</button></div><span className={`gift-status-pill ${complete?'complete':'open'}`}>{complete?'Completo':'Em aberto'}</span></article>})}</div>
+    <section className="gifts-admin-panel"><div className="gifts-admin-heading"><div><p className="eyebrow">LISTA COLABORATIVA</p><h2>Gerir presentes</h2></div><span>{gifts.filter(g=>g.isVisible).length} ativos · {gifts.filter(g=>g.isVisible&&Number(g.reserved)>=Number(g.target)).length} completos</span></div>
+      <div className="gifts-admin-table"><div className="gifts-admin-head"><span>Presente</span><span>Categoria</span><span>Reservado</span><span>Quantidade pedida</span><span>Estado</span><span>No site</span></div>{gifts.map(g=>{const complete=Number(g.reserved)>=Number(g.target);return <article className={`gifts-admin-row ${g.isVisible?'':'inactive'}`} key={g.id}><strong>{g.name}</strong><span>{g.category}</span><span>{g.reserved}</span><div className="gift-target-cell"><b>{g.target}</b><button onClick={()=>openEdit(g)} aria-label={`Alterar quantidade de ${g.name}`}>Alterar</button></div><span className={`gift-status-pill ${complete?'complete':'open'}`}>{complete?'Completo':'Em aberto'}</span><div className="gift-visibility-cell"><span className={`gift-visibility-pill ${g.isVisible?'active':'inactive'}`}>{g.isVisible?'Ativo':'Inativo'}</span><button disabled={updatingVisibility===g.id} onClick={()=>toggleVisibility(g)} aria-label={`${g.isVisible?'Inativar':'Reativar'} ${g.name}`}>{updatingVisibility===g.id?'A guardar…':g.isVisible?'Inativar':'Reativar'}</button></div></article>})}</div>
     </section>
     {editing&&<div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setEditing(null)}}><section className="modal admin-modal" role="dialog" aria-modal="true" aria-label="Alterar quantidade pedida"><button className="modal-close" onClick={()=>setEditing(null)} aria-label="Fechar">×</button><p className="eyebrow">LISTA DE PRESENTES</p><h2>Alterar quantidade</h2><p className="gift-edit-name">{editing.name}</p><form onSubmit={save}><div className="field"><label htmlFor="gift-target">Quantidade pedida</label><input id="gift-target" type="number" min={editing.reserved||1} max="99" value={target} onChange={e=>setTarget(e.target.value)} required/><small className="field-help">Já existem {editing.reserved} unidades reservadas.</small></div>{error&&<p className="error">{error}</p>}<div className="modal-actions"><button className="btn primary">Guardar alterações</button><button type="button" className="btn" onClick={()=>setEditing(null)}>Cancelar</button></div></form></section></div>}
   </>
