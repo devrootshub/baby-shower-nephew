@@ -7,8 +7,8 @@ import {clearSpecialInvitationResponse,getSpecialInvitationResponse,saveSpecialI
 
 const stages=['entrada','missao','responsabilidades','pergunta','aceite'];
 
-export default function SpecialInvitationPage(){
-  const {slug}=useParams();const navigate=useNavigate();
+export default function SpecialInvitationPage({invitationSlug}){
+  const {slug:routeSlug}=useParams();const slug=invitationSlug||routeSlug;const navigate=useNavigate();
   const invitation=useMemo(()=>getSpecialInvitation(slug),[slug]);
   const [stage,setStage]=useState('entrada');const [terms,setTerms]=useState(0);
   useEffect(()=>{if(getSpecialInvitationResponse(slug)?.accepted)setStage('aceite');},[slug]);
