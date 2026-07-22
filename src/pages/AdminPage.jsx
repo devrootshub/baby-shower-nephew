@@ -60,7 +60,6 @@ function AdminSummary({data}){
         {latestReservations.map(r=><RecentRow key={r.id} title={r.gift?.name||'Presente'} meta={`${r.guestName||'Convidado'} · ${r.quantity||1} un.`} date={r.createdAt} tone="gold"/>) }
       </RecentBlock>
     </div>
-    <div className="summary-notice"><span>ℹ</span><p>Estás no modo de demonstração. Os dados ficam guardados apenas neste dispositivo.</p></div>
   </div>
 }
 
