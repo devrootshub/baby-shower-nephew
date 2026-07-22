@@ -14,12 +14,16 @@ export default function AdminPage(){
 
 function AdminDashboard({logout}){
   const [tab,setTab]=useState('Resumo');
+  const [mobileMenuOpen,setMobileMenuOpen]=useState(false);
   const [data,setData]=useState({rsvps:[],guests:[],gifts:[],reservations:[]});
   const load=()=>Promise.all([dataService.getRsvps?.()||[],dataService.getGuests?.()||[],dataService.getGifts(),dataService.getReservations?.()||[]]).then(([rsvps,guests,gifts,reservations])=>setData({rsvps,guests,gifts,reservations}));
   useEffect(()=>{load();return dataService.subscribe?.(load)},[]);
   const reservationRows=data.reservations.map(r=>{const gift=data.gifts.find(g=>g.id===r.giftId);return {...r,giftName:gift?.name||'Presente',giftDescription:gift?.description||'—'}});
-  return <div className="admin-shell">
-    <aside><div className="brand"><span>B</span> baby shower</div>{['Resumo','Confirmações','Presentes','Reservas','Configurações','Exportações'].map(x=><button className={tab===x?'active':''} onClick={()=>setTab(x)} key={x}>{x}</button>)}<button onClick={logout}>Terminar sessão</button></aside>
+  const selectTab=nextTab=>{setTab(nextTab);setMobileMenuOpen(false)};
+  return <div className={`admin-shell ${mobileMenuOpen?'menu-open':''}`}>
+    <header className="admin-mobile-header"><div className="brand"><span>B</span><small>{tab}</small></div><button className="admin-menu-toggle" type="button" aria-expanded={mobileMenuOpen} aria-controls="admin-navigation" onClick={()=>setMobileMenuOpen(open=>!open)}><span aria-hidden="true">{mobileMenuOpen?'×':'☰'}</span>{mobileMenuOpen?'Fechar':'Menu'}</button></header>
+    {mobileMenuOpen&&<button className="admin-menu-backdrop" type="button" aria-label="Fechar menu" onClick={()=>setMobileMenuOpen(false)}/>}
+    <aside id="admin-navigation"><div className="admin-drawer-heading"><div className="brand"><span>B</span> baby shower</div><button type="button" aria-label="Fechar menu" onClick={()=>setMobileMenuOpen(false)}>×</button></div>{['Resumo','Confirmações','Presentes','Reservas','Configurações','Exportações'].map(x=><button className={tab===x?'active':''} onClick={()=>selectTab(x)} key={x}>{x}</button>)}<button onClick={logout}>Terminar sessão</button></aside>
     <main className="admin-main"><div className="admin-top"><div><p className="eyebrow">BABY SHOWER</p><h1>{tab}</h1></div>{isDemo&&<span className="badge">Modo demo</span>}</div>
       {tab==='Resumo'&&<AdminSummary data={data}/>} 
       {tab==='Confirmações'&&<ConfirmationsPage data={data} reload={load}/>} 

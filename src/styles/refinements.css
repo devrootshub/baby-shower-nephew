@@ -39,3 +39,23 @@
 .reservations-admin-panel{background:var(--paper);border:1px solid var(--line);padding:26px}.reservations-admin-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;padding-bottom:20px}.reservations-admin-heading .eyebrow{margin-bottom:8px}.reservations-admin-heading h2{font-size:1.75rem;margin:0}.reservations-admin-heading>span{font-size:.7rem;color:var(--muted);background:var(--cream);border:1px solid var(--line);border-radius:999px;padding:7px 12px}.reservations-admin-head,.reservations-admin-row{display:grid;grid-template-columns:minmax(95px,.6fr) minmax(180px,1.15fr) minmax(250px,1.8fr) 55px 100px;gap:16px;align-items:center;padding:14px 16px}.reservations-admin-head{border-bottom:1px solid var(--line);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}.reservations-admin-row{border-bottom:1px solid #eee6dc;min-height:62px}.reservations-admin-row:last-child{border-bottom:0}.reservations-admin-row strong,.reservations-admin-row span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.reservations-admin-row strong{font-size:.78rem}.reservations-admin-row>span:not(.reservation-status-pill){font-size:.7rem;color:var(--muted)}.reservations-admin-row>b{font-family:'Playfair Display';font-size:1rem}.reservation-status-pill{justify-self:start;border-radius:999px;padding:6px 10px;font-size:.62rem;font-weight:700}.reservation-status-pill.active{color:#34772c;background:#e5f2e2;border:1px solid #a9d2a3}.reservation-status-pill.cancelled{color:#a33e38;background:#fae9e7;border:1px solid #e5aaa5}.reservations-empty{color:var(--muted);font-size:.8rem;padding:22px 16px;margin:0}
 
 @media(max-width:900px){.reservations-admin-head{display:none}.reservations-admin-row{grid-template-columns:minmax(0,1fr) auto;gap:7px 14px;padding:16px 8px}.reservations-admin-row strong,.reservations-admin-row>span:not(.reservation-status-pill),.reservations-admin-row>b{grid-column:1}.reservation-status-pill{grid-column:2;grid-row:1/3}.reservations-admin-heading{align-items:flex-start;flex-direction:column}}
+
+.admin-mobile-header,.admin-menu-backdrop,.admin-drawer-heading>button{display:none}
+
+@media(max-width:900px){
+  .admin-shell{display:block;padding-top:64px}
+  .admin-mobile-header{position:fixed;z-index:62;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 16px;background:var(--brown);color:#fff;box-shadow:0 5px 20px #30271f20}
+  .admin-mobile-header .brand{margin:0;gap:9px}
+  .admin-mobile-header .brand small{max-width:44vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;color:#f3e9df;text-transform:uppercase}
+  .admin-menu-toggle{display:flex;align-items:center;gap:8px;min-height:40px;border:1px solid #ffffff35;border-radius:999px;padding:8px 13px;background:#ffffff12;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer}
+  .admin-menu-toggle span{font-size:1.15rem;line-height:1}
+  .admin-menu-backdrop{display:block;position:fixed;z-index:63;inset:64px 0 0;width:100%;border:0;background:#30271f80;backdrop-filter:blur(2px);cursor:pointer}
+  .admin-shell aside{position:fixed;z-index:64;top:64px;bottom:0;left:0;width:min(82vw,320px);display:flex;flex-direction:column;overflow-y:auto;padding:20px 16px 18px;transform:translateX(-105%);transition:transform .25s ease;box-shadow:18px 0 45px #30271f35}
+  .admin-shell.menu-open aside{transform:translateX(0)}
+  .admin-shell aside .brand{display:flex;margin:0}
+  .admin-drawer-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;padding:0 4px 18px;border-bottom:1px solid #ffffff22}
+  .admin-drawer-heading>button{display:grid;place-items:center;width:38px;height:38px;border:1px solid #ffffff35!important;border-radius:50%!important;padding:0!important;color:#fff!important;font-size:1.5rem;line-height:1}
+  .admin-shell aside>button{width:100%;white-space:normal;padding:14px 15px}
+  .admin-shell aside>button:last-child{margin:auto 0 0;border-top:1px solid #ffffff22;border-radius:0;padding-top:22px}
+  .admin-main{padding-top:28px}
+}
