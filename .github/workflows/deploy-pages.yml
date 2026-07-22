@@ -20,7 +20,7 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_ADMIN_AUTH_EMAIL: ${{ secrets.VITE_ADMIN_AUTH_EMAIL }}
           VITE_ADMIN_USERNAME: babyadmin
-          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/baby-shower-nephew/' }}
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/' }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with: {path: dist}
