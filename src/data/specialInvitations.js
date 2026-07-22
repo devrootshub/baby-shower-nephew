@@ -13,21 +13,21 @@ export const specialInvitations=[
   {
     slug:'padrinho',personName:'Gonçalo',role:'padrinho',treatment:'Olá',missionNumber:'BS-001',
     title:'Missão confidencial',agentName:'Baby J&D',missionName:'Operação Padrinho',
-    introduction:'Ainda sou muito pequenino e nem sequer cheguei ao mundo, mas já ouvi falar muito de ti.',
+    introduction:'Ainda nem sequer cheguei ao mundo, mas já ouvi falar muito de ti.',
     missionText:'Disseram-me que és alguém especial, em quem posso confiar para uma das missões mais importantes da minha vida.',
     responsibilities:sharedResponsibilities,
     finalQuestion:'Aceitas ser o meu padrinho?',acceptLabel:'Aceito a missão',alternativeLabel:'Preciso de analisar os termos',
-    acceptedMessage:'Bem-vindo ao cargo de padrinho. O bebé ainda não nasceu e já fez uma excelente escolha.',
+    acceptedMessage:'Bem-vindo ao cargo de padrinho. Ainda não cheguei ao mundo e já fiz uma excelente escolha.',
     signature:'Com carinho, Baby J&D',note:'P.S. O cargo inclui muitos mimos e não tem data de validade.',image:null,responseStatus:'pending'
   },
   {
     slug:'madrinha',personName:'Lili',role:'madrinha',treatment:'Olá',missionNumber:'BS-002',
     title:'Missão confidencial',agentName:'Baby J&D',missionName:'Operação Madrinha',
-    introduction:'Ainda sou muito pequenina e nem sequer cheguei ao mundo, mas já ouvi falar muito de ti.',
+    introduction:'Ainda nem sequer cheguei ao mundo, mas já ouvi falar muito de ti.',
     missionText:'Disseram-me que és alguém especial, em quem posso confiar para uma das missões mais importantes da minha vida.',
     responsibilities:sharedResponsibilities,
     finalQuestion:'Aceitas ser a minha madrinha?',acceptLabel:'Aceito a missão',alternativeLabel:'Solicitar mais informações',
-    acceptedMessage:'Bem-vinda ao cargo de madrinha. O bebé ainda não nasceu e já fez uma excelente escolha.',
+    acceptedMessage:'Bem-vinda ao cargo de madrinha. Ainda não cheguei ao mundo e já fiz uma excelente escolha.',
     signature:'Com carinho, Baby J&D',note:'P.S. A missão começa já e inclui uma quantidade ilimitada de abraços.',image:null,responseStatus:'pending'
   }
 ];

@@ -38,7 +38,7 @@ export default function SpecialInvitationPage({invitationSlug}){
       {stage==='pergunta'&&<div className="mission-stage mission-question">
         <span className="mission-icon"><Search size={29}/></span><p className="eyebrow">DECISÃO FINAL</p><h1>{invitation.personName},<br/><em>{invitation.finalQuestion}</em></h1><p>Esta é uma missão para a vida inteira.</p>
         <div className="mission-actions"><button className="btn primary" onClick={accept}><Heart size={17}/> {invitation.acceptLabel}</button><button className="btn" onClick={()=>setTerms(value=>Math.min(value+1,2))}>{terms===0?invitation.alternativeLabel:terms===1?'Os termos incluem mimos ilimitados':'Está bem… aceito analisar!'}</button></div>
-        {terms>0&&<p className="terms-note" role="status">Cláusula adicional: o bebé reserva o direito de pedir colo a qualquer hora.</p>}
+        {terms>0&&<p className="terms-note" role="status">Cláusula adicional: fica reservado o direito de pedir colo a qualquer hora.</p>}
       </div>}
       {stage==='aceite'&&<div className="mission-stage mission-accepted">
         <div className="celebration-stars" aria-hidden="true">✦　·　✧　·　✦</div><span className="mission-complete"><Sparkles size={25}/> MISSÃO ACEITE</span><p className="eyebrow">NOMEAÇÃO OFICIALMENTE CONFIRMADA</p><h1>Excelente <em>escolha.</em></h1><p>{invitation.acceptedMessage}</p><p className="mission-signature">{invitation.signature}</p><small>{invitation.note}</small>
