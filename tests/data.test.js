@@ -9,10 +9,16 @@ describe('dados de produção',()=>{
     expect(new Set(guestSeed.map(g=>g.id)).size).toBe(49);
   });
 
-  it('carrega os vinte presentes com imagens locais',()=>{
-    expect(gifts).toHaveLength(20);
+  it('carrega os presentes com imagens locais e fraldas ordenadas por tamanho',()=>{
+    expect(gifts).toHaveLength(26);
     expect(gifts.every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
     expect(gifts.every(g=>g.target>=1)).toBe(true);
+    expect(gifts.filter(g=>g.name.startsWith('Fraldas Dodot')).map(g=>g.name)).toEqual([
+      'Fraldas Dodot Sensitive T0',
+      'Fraldas Dodot Sensitive T1',
+      'Fraldas Dodot Sensitive T2',
+      'Fraldas Dodot Sensitive T3'
+    ]);
   });
 
   it('mantém a data e o prazo coerentes',()=>{
