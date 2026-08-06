@@ -10,7 +10,7 @@ describe('dados de produção',()=>{
   });
 
   it('carrega os presentes com imagens locais e fraldas ordenadas por tamanho',()=>{
-    expect(gifts).toHaveLength(27);
+    expect(gifts).toHaveLength(30);
     expect(gifts.every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
     expect(gifts.every(g=>g.target>=1)).toBe(true);
     expect(gifts.filter(g=>g.name.startsWith('Fraldas Dodot')).map(g=>g.name)).toEqual([
