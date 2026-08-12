@@ -10,8 +10,8 @@ describe('dados de produção',()=>{
   });
 
   it('carrega os presentes com imagens locais e fraldas ordenadas por tamanho',()=>{
-    expect(gifts).toHaveLength(30);
-    expect(gifts.every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
+    expect(gifts).toHaveLength(48);
+    expect(gifts.filter(g=>g.image).every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
     expect(gifts.every(g=>g.target>=1)).toBe(true);
     expect(gifts.filter(g=>g.name.startsWith('Fraldas Dodot')).map(g=>g.name)).toEqual([
       'Fraldas Dodot Sensitive T0',
@@ -19,6 +19,8 @@ describe('dados de produção',()=>{
       'Fraldas Dodot Sensitive T2',
       'Fraldas Dodot Sensitive T3'
     ]);
+    expect(gifts.filter(g=>g.category==='Roupa e têxteis')).toHaveLength(8);
+    expect(gifts.find(g=>g.id==='chat-48').url).toBe('https://www.amazon.es/dp/B0DSW1P5PD?th=1');
   });
 
   it('mantém a data e o prazo coerentes',()=>{
