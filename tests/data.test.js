@@ -10,7 +10,7 @@ describe('dados de produção',()=>{
   });
 
   it('carrega os presentes com imagens locais e fraldas ordenadas por tamanho',()=>{
-    expect(gifts).toHaveLength(48);
+    expect(gifts).toHaveLength(49);
     expect(gifts.filter(g=>g.image).every(g=>g.image.startsWith('/images/gifts/'))).toBe(true);
     expect(gifts.every(g=>g.target>=1)).toBe(true);
     expect(gifts.filter(g=>g.name.startsWith('Fraldas Dodot')).map(g=>g.name)).toEqual([
@@ -21,6 +21,10 @@ describe('dados de produção',()=>{
     ]);
     expect(gifts.filter(g=>g.category==='Roupa e têxteis')).toHaveLength(8);
     expect(gifts.find(g=>g.id==='chat-48').url).toBe('https://www.amazon.es/dp/B0DSW1P5PD?th=1');
+    expect(gifts.find(g=>g.id==='chat-49')).toMatchObject({
+      category:'Alimentação',
+      url:'https://www.amazon.es/-/pt/GROWNSY-Esterilizador-Biberones-El%C3%A9ctrico-Sacaleches/dp/B0DNYK6V1B?th=1'
+    });
   });
 
   it('mantém a data e o prazo coerentes',()=>{
