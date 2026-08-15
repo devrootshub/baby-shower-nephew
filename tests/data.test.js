@@ -1,6 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {gifts,guestSeed} from '../src/data/demoData';
 import {siteConfig} from '../src/data/siteConfig';
+import {invitationConfig,pregnancyProgress} from '../src/data/invitationConfig';
 
 describe('dados de produção',()=>{
   it('carrega a lista atual de convites',()=>{
@@ -31,5 +32,12 @@ describe('dados de produção',()=>{
     expect(new Date(siteConfig.rsvpDeadline)<new Date(siteConfig.eventDate)).toBe(true);
     expect(siteConfig.eventTime).toBe('14:30');
     expect(siteConfig.eventEndTime).toBe('19:30');
+  });
+
+  it('calcula o progresso real da gravidez até à data prevista',()=>{
+    expect(invitationConfig.estimatedDueDate).toBe('2027-02-08');
+    expect(pregnancyProgress(invitationConfig.estimatedDueDate,new Date('2026-05-04T12:00:00Z'))).toBe(0);
+    expect(pregnancyProgress(invitationConfig.estimatedDueDate,new Date('2026-08-15T12:00:00Z'))).toBe(37);
+    expect(pregnancyProgress(invitationConfig.estimatedDueDate,new Date('2027-02-08T12:00:00Z'))).toBe(100);
   });
 });
