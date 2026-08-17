@@ -22,6 +22,11 @@ describe('dados de produção',()=>{
     ]);
     expect(gifts.filter(g=>g.category==='Roupa e têxteis')).toHaveLength(8);
     expect(gifts.find(g=>g.id==='chat-48').url).toBe('https://www.amazon.es/dp/B0DSW1P5PD?th=1');
+    expect(gifts.find(g=>g.id==='chat-37')).toMatchObject({
+      name:'Pack de 5 babetes Kiabi — castanho',
+      image:'/images/gifts/babetes-kiabi-castanho.png',
+      url:'https://www.kiabi.pt/5-babetes-com-estampados-de-fantasia-que-fecham-com-molas-de-pressao-castanho_P979276C979277'
+    });
     expect(gifts.find(g=>g.id==='chat-49')).toMatchObject({
       category:'Alimentação',
       url:'https://www.amazon.es/-/pt/GROWNSY-Esterilizador-Biberones-El%C3%A9ctrico-Sacaleches/dp/B0DNYK6V1B?th=1'
