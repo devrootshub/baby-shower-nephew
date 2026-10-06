@@ -22,6 +22,8 @@ describe('dados de produção',()=>{
     ]);
     expect(gifts.filter(g=>g.category==='Roupa e têxteis')).toHaveLength(8);
     expect(gifts.find(g=>g.id==='chat-48').url).toBe('https://www.amazon.es/dp/B0DSW1P5PD?th=1');
+    expect(gifts.find(g=>g.id==='chat-9').url).toBe('https://www.babycool.com/products/muda-fraldas-em-espuma-nattou-taupe-70x50cm');
+    expect(gifts.find(g=>g.id==='chat-13').url).toBe('https://www.babycool.com/products/contentor-para-fraldas-dropy-taupe');
     expect(gifts.find(g=>g.id==='chat-37')).toMatchObject({
       name:'Pack de 5 babetes Kiabi — castanho',
       image:'/images/gifts/babetes-kiabi-castanho.png',
