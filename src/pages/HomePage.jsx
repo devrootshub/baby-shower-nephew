@@ -1,15 +1,20 @@
+import {useEffect,useState} from 'react';
 import Header from '../components/public/Header';
 import Countdown from '../components/public/Countdown';
 import RSVPForm from '../components/public/RSVPForm';
 import GiftRegistry from '../components/public/GiftRegistry';
 import {siteConfig as c} from '../data/siteConfig';
+import {dataService} from '../services';
 
 const formatDate=d=>new Intl.DateTimeFormat('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${d}T12:00:00`));
 const goTo=id=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
 
 export default function HomePage(){
+  const [liveSettings,setLiveSettings]=useState(null);
+  useEffect(()=>{let active=true;dataService.getEventSettings().then(settings=>{if(active)setLiveSettings(settings||{eventStatus:c.eventStatus,galleryEnabled:false})}).catch(()=>{if(active)setLiveSettings({eventStatus:c.eventStatus,galleryEnabled:false})});return()=>{active=false}},[]);
   const dateLabel=c.eventDate==='EVENT_DATE'?'Data a anunciar':formatDate(c.eventDate);
-  if(c.eventStatus==='closed')return <><Header/><main className="closed"><div className="bear">🧸</div><p className="eyebrow">O NOSSO CORAÇÃO ESTÁ CHEIO</p><h1>{c.closedTitle}</h1><p>{c.closedMessage}</p><em>{c.closedSignature}</em></main></>;
+  if(!liveSettings)return <main className="site-loading">A carregar…</main>;
+  if(liveSettings.eventStatus==='closed')return <><Header/><main className="closed"><div className="bear">🧸</div><p className="eyebrow">O NOSSO CORAÇÃO ESTÁ CHEIO</p><h1>{c.closedTitle}</h1><p>{c.closedMessage}</p><em>{c.closedSignature}</em>{liveSettings.galleryEnabled?<a className="btn primary closed-gallery-link" href="#/memorias">Ver as memórias deste dia</a>:<span className="closed-gallery-soon">Em breve, partilharemos aqui as memórias deste dia.</span>}</main></>;
   return <><Header/><main>
     <section className="hero" id="inicio">
       <div className="hero-copy"><p className="eyebrow">UM DIA ESPECIAL • UMA NOVA AVENTURA</p><h1>Um bebé<br/><em>está a chegar</em></h1><p className="hero-sub">{c.subtitle}</p><div className="hero-meta"><span>✦ {dateLabel}</span><span>⌖ {c.venueName}, Setúbal</span></div><div className="hero-buttons"><button className="btn primary" onClick={()=>goTo('confirmar')}>Confirmar presença</button><button className="btn ghost" onClick={()=>goTo('presentes')}>Ver presentes</button></div></div>

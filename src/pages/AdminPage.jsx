@@ -1,13 +1,16 @@
 import {useEffect,useState} from 'react';
 import {isDemo,dataService} from '../services';
 import {supabase} from '../lib/supabase';
+import PostEventSettings from '../components/admin/PostEventSettings';
 
 export default function AdminPage(){
   const [session,setSession]=useState(isDemo&&import.meta.env.DEV?sessionStorage.getItem('demo-admin'):'');
+  const [checking,setChecking]=useState(!isDemo);
   const [form,setForm]=useState({user:'',password:''});
   const [error,setError]=useState('');
-  useEffect(()=>{supabase?.auth.getSession().then(({data})=>setSession(data.session));const {data}=supabase?.auth.onAuthStateChange((_,s)=>setSession(s))||{};return()=>data?.subscription?.unsubscribe()},[]);
-  const login=async e=>{e.preventDefault();setError('');if(form.user.trim().toLowerCase()!==(import.meta.env.VITE_ADMIN_USERNAME||'babyadmin').toLowerCase()){setError('Não foi possível iniciar sessão. Verifica os dados e tenta novamente.');return}if(isDemo&&import.meta.env.DEV){sessionStorage.setItem('demo-admin','1');setSession('demo');return}const email=import.meta.env.VITE_ADMIN_AUTH_EMAIL;if(!email){setError('A autenticação administrativa ainda não está configurada.');return}const {error}=await supabase.auth.signInWithPassword({email,password:form.password});if(error)setError('Não foi possível iniciar sessão. Verifica os dados e tenta novamente.')};
+  useEffect(()=>{let active=true;const verify=async s=>{if(!active)return;if(!s){setSession('');setChecking(false);return}try{const profile=await dataService.getProfile();if(profile?.role==='admin')setSession(s);else{setSession('');setError('A sessão atual dá acesso apenas à galeria. Para administrar o site, inicia sessão com os dados dos pais.')}}catch{setSession('')}finally{setChecking(false)}};supabase?.auth.getSession().then(({data})=>verify(data.session));const {data}=supabase?.auth.onAuthStateChange((_,s)=>setTimeout(()=>verify(s),0))||{};return()=>{active=false;data?.subscription?.unsubscribe()}},[]);
+  const login=async e=>{e.preventDefault();setError('');if(form.user.trim().toLowerCase()!==(import.meta.env.VITE_ADMIN_USERNAME||'babyadmin').toLowerCase()){setError('Não foi possível iniciar sessão. Verifica os dados e tenta novamente.');return}if(isDemo&&import.meta.env.DEV){sessionStorage.setItem('demo-admin','1');setSession('demo');return}const email=import.meta.env.VITE_ADMIN_AUTH_EMAIL;if(!email){setError('A autenticação administrativa ainda não está configurada.');return}const {data,error:loginError}=await supabase.auth.signInWithPassword({email,password:form.password});if(loginError){setError('Não foi possível iniciar sessão. Verifica os dados e tenta novamente.');return}const profile=await dataService.getProfile();if(profile?.role!=='admin'){await supabase.auth.signOut();setError('Esta conta não tem acesso à administração.');return}setSession(data.session)};
+  if(checking)return <main className="admin-login"><div className="login-card"><p>A verificar o acesso…</p></div></main>;
   if(session)return <AdminDashboard logout={async()=>{sessionStorage.removeItem('demo-admin');await supabase?.auth.signOut();setSession('')}}/>;
   return <main className="admin-login"><div className="login-card"><div className="brand"><span>B</span> baby shower</div><p className="eyebrow">ÁREA RESERVADA</p><h1>Bem-vinda</h1><p>Inicia sessão para gerir o evento.</p>{isDemo&&import.meta.env.DEV&&<p className="demo-note">Modo demo: utiliza “babyadmin” e qualquer password não vazia.</p>}<form onSubmit={login}><div className="field"><label>Utilizador</label><input value={form.user} onChange={e=>setForm({...form,user:e.target.value})} required/></div><div className="field"><label>Password</label><input type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} required/></div>{error&&<p className="error">{error}</p>}<button className="btn primary full">Entrar</button></form><a href="#/">← Voltar ao site</a></div></main>
 }
@@ -29,7 +32,7 @@ function AdminDashboard({logout}){
       {tab==='Confirmações'&&<ConfirmationsPage data={data} reload={load}/>} 
       {tab==='Presentes'&&<GiftsAdminPage gifts={data.gifts} reload={load}/>} 
       {tab==='Reservas'&&<ReservationsAdminPage rows={reservationRows}/>} 
-      {tab==='Configurações'&&<section className="panel"><h2>Configurações do evento</h2><p>Os dados principais encontram-se centralizados em <code>src/data/siteConfig.js</code>. Depois de ligares o Supabase, esta área passa a guardar as alterações na base de dados.</p><button className="btn danger" onClick={()=>alert('No modo demo esta ação é apenas ilustrativa.')}>Encerrar evento</button></section>}
+      {tab==='Configurações'&&<PostEventSettings/>}
       {tab==='Exportações'&&<ExportPanel data={data}/>} 
     </main>
   </div>

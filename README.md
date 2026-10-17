@@ -35,10 +35,27 @@ VITE_SUPABASE_URL=https://PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 VITE_ADMIN_USERNAME=babyadmin
 VITE_ADMIN_AUTH_EMAIL=email-do-admin@exemplo.pt
+VITE_GALLERY_AUTH_EMAIL=memorias@exemplo.pt
 VITE_BASE_PATH=/
 ```
 
 Nunca coloques a Secret key, `service_role` ou a password do admin num ficheiro do projeto.
+
+## Galeria privada pós-evento
+
+1. Num projeto já instalado, executa `supabase/post-event-gallery-2026-10-17.sql` no SQL Editor.
+2. Em **Authentication → Users**, cria um segundo utilizador para os convidados. O email é apenas um identificador técnico; os convidados só verão o campo da password.
+3. Copia o UUID desse utilizador e executa:
+
+```sql
+insert into public.admin_profiles(user_id,role,display_name)
+values ('UUID_DO_UTILIZADOR','gallery_guest','Convidados da galeria');
+```
+
+4. Usa esse email em `VITE_GALLERY_AUTH_EMAIL` e também no secret com o mesmo nome no GitHub Actions.
+5. Em `#/admin` → **Configurações**, carrega as fotografias e vídeos e ativa a galeria quando estiver pronta.
+
+O bucket `event-gallery` é privado. Apenas o administrador e o utilizador partilhado da galeria conseguem criar links temporários para os ficheiros.
 
 ## Validar
 
@@ -61,6 +78,7 @@ No repositório `baby-shower-nephew`:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
    - `VITE_ADMIN_AUTH_EMAIL`
+   - `VITE_GALLERY_AUTH_EMAIL`
 3. O username público inicial usa `babyadmin`.
 4. Sem domínio próprio, o workflow usa `/baby-shower-nephew/` como base.
 5. Para domínio próprio, cria a variável de Actions `VITE_BASE_PATH` com o valor `/`.

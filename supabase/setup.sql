@@ -19,6 +19,7 @@ create table public.event_settings (
   rsvp_enabled boolean not null default true,
   gifts_enabled boolean not null default true,
   reservation_changes_enabled boolean not null default true,
+  gallery_enabled boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -26,7 +27,7 @@ create table public.event_settings (
 create table public.admin_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid unique not null references auth.users(id) on delete cascade,
-  role text not null default 'admin' check (role = 'admin'),
+  role text not null default 'admin' check (role in ('admin','gallery_guest')),
   display_name text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -103,6 +104,19 @@ create table public.activity_log (
   created_at timestamptz not null default now()
 );
 
+create table public.gallery_items (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  caption text,
+  media_type text not null check (media_type in ('image','video')),
+  storage_path text unique not null,
+  file_name text not null,
+  is_visible boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index rsvps_created_idx on public.rsvps(created_at desc);
 create index reservations_gift_status_idx on public.gift_reservations(gift_id,status);
 create index reservations_created_idx on public.gift_reservations(created_at desc);
@@ -120,10 +134,22 @@ create trigger rsvps_updated before update on public.rsvps for each row execute 
 create trigger categories_updated before update on public.gift_categories for each row execute function public.set_updated_at();
 create trigger gifts_updated before update on public.gifts for each row execute function public.set_updated_at();
 create trigger reservations_updated before update on public.gift_reservations for each row execute function public.set_updated_at();
+create trigger gallery_items_updated before update on public.gallery_items for each row execute function public.set_updated_at();
 
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists(select 1 from public.admin_profiles where user_id = auth.uid() and role = 'admin')
+$$;
+
+create or replace function public.is_gallery_member()
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists(select 1 from public.admin_profiles where user_id=auth.uid() and role in ('admin','gallery_guest'))
+$$;
+
+create or replace function public.get_public_event_settings()
+returns table(event_status text,gallery_enabled boolean,updated_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select e.event_status,e.gallery_enabled,e.updated_at from public.event_settings e order by e.created_at limit 1
 $$;
 
 create or replace function public.get_public_invitations()
@@ -239,6 +265,7 @@ alter table public.gift_categories enable row level security;
 alter table public.gifts enable row level security;
 alter table public.gift_reservations enable row level security;
 alter table public.activity_log enable row level security;
+alter table public.gallery_items enable row level security;
 
 create policy admin_profiles_self_read on public.admin_profiles for select to authenticated using(user_id=auth.uid());
 create policy event_settings_admin_all on public.event_settings for all to authenticated using(public.is_admin()) with check(public.is_admin());
@@ -248,11 +275,16 @@ create policy categories_admin_all on public.gift_categories for all to authenti
 create policy gifts_admin_all on public.gifts for all to authenticated using(public.is_admin()) with check(public.is_admin());
 create policy reservations_admin_all on public.gift_reservations for all to authenticated using(public.is_admin()) with check(public.is_admin());
 create policy activity_admin_read on public.activity_log for select to authenticated using(public.is_admin());
+create policy gallery_items_member_read on public.gallery_items for select to authenticated using(public.is_gallery_member());
+create policy gallery_items_admin_insert on public.gallery_items for insert to authenticated with check(public.is_admin());
+create policy gallery_items_admin_update on public.gallery_items for update to authenticated using(public.is_admin()) with check(public.is_admin());
+create policy gallery_items_admin_delete on public.gallery_items for delete to authenticated using(public.is_admin());
 
 revoke all on all tables in schema public from anon,authenticated;
 grant select on public.admin_profiles to authenticated;
 grant select,insert,update,delete on public.event_settings,public.guest_invitations,public.rsvps,public.gift_categories,public.gifts,public.gift_reservations to authenticated;
 grant select on public.activity_log to authenticated;
+grant select,insert,update,delete on public.gallery_items to authenticated;
 revoke all on function public.get_public_invitations() from public;
 revoke all on function public.get_public_gifts() from public;
 revoke all on function public.create_rsvp(uuid,text,integer,integer,text,text,text) from public;
@@ -263,6 +295,15 @@ revoke all on function public.cancel_reservation_by_token(text) from public;
 revoke all on function public.admin_update_gift_target(uuid,integer) from public;
 grant execute on function public.get_public_invitations(),public.get_public_gifts(),public.create_rsvp(uuid,text,integer,integer,text,text,text),public.create_gift_reservation(uuid,text,integer),public.get_reservation_by_token(text),public.update_reservation_by_token(text,text,integer),public.cancel_reservation_by_token(text) to anon,authenticated;
 grant execute on function public.admin_update_gift_target(uuid,integer) to authenticated;
+grant execute on function public.get_public_event_settings() to anon,authenticated;
+
+insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
+values('event-gallery','event-gallery',false,52428800,array['image/jpeg','image/png','image/webp','image/heic','video/mp4','video/quicktime','video/webm'])
+on conflict(id) do nothing;
+create policy event_gallery_member_read on storage.objects for select to authenticated using(bucket_id='event-gallery' and public.is_gallery_member());
+create policy event_gallery_admin_insert on storage.objects for insert to authenticated with check(bucket_id='event-gallery' and public.is_admin());
+create policy event_gallery_admin_update on storage.objects for update to authenticated using(bucket_id='event-gallery' and public.is_admin()) with check(bucket_id='event-gallery' and public.is_admin());
+create policy event_gallery_admin_delete on storage.objects for delete to authenticated using(bucket_id='event-gallery' and public.is_admin());
 
 insert into public.event_settings(title,subtitle,event_date,event_time,event_end_time,venue_name,address,maps_url,event_status)
 values('Um bebé está a chegar','Vamos celebrar juntos esta nova aventura','2026-10-16','14:30','19:30','Quinta da Alana','Rua das Fazendas, 2910-212 Gâmbia, Setúbal','https://www.google.com/maps/search/?api=1&query=Quinta+da+Alana+Gambia+Setubal','open');
